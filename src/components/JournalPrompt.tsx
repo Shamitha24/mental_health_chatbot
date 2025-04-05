@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 interface JournalPromptProps {
   prompt: string;
-  onSave: (entry: string) => void;
+  onSave: (entry: string, prompt: string) => void;
   className?: string;
 }
 
@@ -15,7 +15,7 @@ const JournalPrompt: React.FC<JournalPromptProps> = ({ prompt, onSave, className
   
   const handleSave = () => {
     if (entry.trim()) {
-      onSave(entry);
+      onSave(entry, prompt);
       setEntry("");
     }
   };

@@ -1,12 +1,16 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import MoodTracker from "./MoodTracker";
 import MoodChart from "./MoodChart";
 import JournalPrompt from "./JournalPrompt";
+import JournalHistory from "./JournalHistory";
 import ChatInterface from "./ChatInterface";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
+import ThemeToggle from "./ThemeToggle";
+import AuthButtons from "./AuthButtons";
+import { v4 as uuidv4 } from "uuid";
 import {
   SidebarProvider,
   Sidebar,
@@ -17,7 +21,7 @@ import {
   SidebarMenuButton,
   SidebarInset
 } from "@/components/ui/sidebar";
-import { Book, MessageSquare, BarChart } from "lucide-react";
+import { Book, MessageSquare, BarChart, History, Home } from "lucide-react";
 
 type MoodType = "great" | "good" | "neutral" | "bad" | "terrible";
 
@@ -43,6 +47,14 @@ const journalPrompts = [
   "Describe a moment when you felt at peace today."
 ];
 
+// Interface for journal entries
+interface JournalEntry {
+  id: string;
+  content: string;
+  prompt: string;
+  timestamp: Date;
+}
+
 const Dashboard: React.FC = () => {
   const isMobile = useIsMobile();
   // State for mood data
@@ -50,10 +62,21 @@ const Dashboard: React.FC = () => {
   // Active tab (used for mobile navigation)
   const [activeTab, setActiveTab] = useState("dashboard");
   
+  // Journal entries
+  const [journalEntries, setJournalEntries] = useState<JournalEntry[]>(() => {
+    const savedEntries = localStorage.getItem("journalEntries");
+    return savedEntries ? JSON.parse(savedEntries) : [];
+  });
+  
   // Randomly select a journal prompt
   const [prompt, setPrompt] = useState(
     journalPrompts[Math.floor(Math.random() * journalPrompts.length)]
   );
+  
+  // Save journal entries to localStorage
+  useEffect(() => {
+    localStorage.setItem("journalEntries", JSON.stringify(journalEntries));
+  }, [journalEntries]);
   
   // Handle mood submission
   const handleMoodSubmit = (mood: MoodType, notes: string) => {
@@ -86,7 +109,16 @@ const Dashboard: React.FC = () => {
       return newData;
     });
     
+    // Apply mood-based color theme
+    applyMoodTheme(mood);
+    
     toast.success("Mood tracked successfully!");
+  };
+  
+  // Apply color theme based on mood
+  const applyMoodTheme = (mood: MoodType) => {
+    document.documentElement.classList.remove('mood-great', 'mood-good', 'mood-neutral', 'mood-bad', 'mood-terrible');
+    document.documentElement.classList.add(`mood-${mood}`);
   };
   
   // Get numerical value for mood
@@ -102,9 +134,18 @@ const Dashboard: React.FC = () => {
   };
   
   // Handle journal entry submission
-  const handleJournalSave = (entry: string) => {
-    console.log("Journal entry saved:", entry);
-    // In a real app, we would save this to a database
+  const handleJournalSave = (entry: string, prompt: string) => {
+    // Create new entry
+    const newEntry: JournalEntry = {
+      id: uuidv4(),
+      content: entry,
+      prompt,
+      timestamp: new Date()
+    };
+    
+    // Add to journal entries
+    setJournalEntries(prev => [newEntry, ...prev]);
+    
     toast.success("Journal entry saved!");
     
     // Set a new random prompt
@@ -150,14 +191,34 @@ const Dashboard: React.FC = () => {
               <span>Journal</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton 
+              onClick={() => handleTabChange("history")} 
+              isActive={activeTab === "history"}
+              tooltip="History"
+            >
+              <History />
+              <span>History</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
         </SidebarMenu>
       </SidebarContent>
     </Sidebar>
   );
   
+  const HeaderSection = () => (
+    <div className="flex justify-between items-center mb-4 md:mb-6">
+      <h1 className="text-2xl md:text-3xl font-bold text-mental-tertiary">Mental Health Copilot</h1>
+      <div className="flex items-center gap-2">
+        <ThemeToggle />
+        <AuthButtons />
+      </div>
+    </div>
+  );
+  
   const MainContent = () => (
     <div className="container px-4 py-4 md:py-8 max-w-6xl">
-      <h1 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6 text-mental-tertiary">Mental Health Copilot</h1>
+      <HeaderSection />
       
       {isMobile ? (
         // Mobile view with active tab content
@@ -176,14 +237,19 @@ const Dashboard: React.FC = () => {
           {activeTab === "journal" && (
             <JournalPrompt prompt={prompt} onSave={handleJournalSave} />
           )}
+          
+          {activeTab === "history" && (
+            <JournalHistory entries={journalEntries} />
+          )}
         </div>
       ) : (
         // Desktop tabs view
         <Tabs defaultValue="dashboard" className="w-full" onValueChange={handleTabChange}>
-          <TabsList className="grid w-full grid-cols-3 mb-8 bg-mental-light">
+          <TabsList className="grid w-full grid-cols-4 mb-8 bg-mental-light">
             <TabsTrigger value="dashboard" className="data-[state=active]:bg-mental-primary data-[state=active]:text-white">Dashboard</TabsTrigger>
             <TabsTrigger value="chat" className="data-[state=active]:bg-mental-primary data-[state=active]:text-white">Chat</TabsTrigger>
             <TabsTrigger value="journal" className="data-[state=active]:bg-mental-primary data-[state=active]:text-white">Journal</TabsTrigger>
+            <TabsTrigger value="history" className="data-[state=active]:bg-mental-primary data-[state=active]:text-white">History</TabsTrigger>
           </TabsList>
           
           <TabsContent value="dashboard" className="animate-fade-in">
@@ -200,6 +266,10 @@ const Dashboard: React.FC = () => {
           <TabsContent value="journal" className="animate-fade-in">
             <JournalPrompt prompt={prompt} onSave={handleJournalSave} />
           </TabsContent>
+          
+          <TabsContent value="history" className="animate-fade-in">
+            <JournalHistory entries={journalEntries} />
+          </TabsContent>
         </Tabs>
       )}
     </div>
@@ -212,7 +282,10 @@ const Dashboard: React.FC = () => {
         <SidebarInset>
           <div className="flex justify-between items-center p-4 border-b">
             <h2 className="text-xl font-semibold text-mental-tertiary">Mental Health Copilot</h2>
-            <SidebarTrigger />
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+              <SidebarTrigger />
+            </div>
           </div>
           <MainContent />
         </SidebarInset>

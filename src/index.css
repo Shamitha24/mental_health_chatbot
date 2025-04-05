@@ -65,6 +65,47 @@
     --input: 262 25% 20%;
     --ring: 257 84% 75%;
   }
+  
+  /* Mood-based theme variations */
+  .mood-great {
+    --primary: 130 84% 65%;
+    --accent: 130 84% 60%;
+    --secondary: 130 50% 40%;
+    --mental-primary: #5de190;
+    --mental-secondary: #3eb96b;
+    --mental-tertiary: #2a9d50;
+  }
+  
+  .mood-good {
+    --primary: 200 84% 65%;
+    --accent: 200 84% 60%;
+    --secondary: 200 50% 40%; 
+    --mental-primary: #5dc0e1;
+    --mental-secondary: #3e9bb9;
+    --mental-tertiary: #2a7d9d;
+  }
+  
+  .mood-neutral {
+    /* Keep the default purple theme */
+  }
+  
+  .mood-bad {
+    --primary: 40 84% 65%;
+    --accent: 40 84% 60%;
+    --secondary: 40 50% 40%;
+    --mental-primary: #e1c85d;
+    --mental-secondary: #b9a33e;
+    --mental-tertiary: #9d872a;
+  }
+  
+  .mood-terrible {
+    --primary: 0 84% 65%;
+    --accent: 0 84% 60%;
+    --secondary: 0 50% 40%;
+    --mental-primary: #e15d5d;
+    --mental-secondary: #b93e3e;
+    --mental-tertiary: #9d2a2a;
+  }
 }
 
 @layer base {
@@ -96,11 +137,11 @@
 
 @layer components {
   .mental-gradient-bg {
-    @apply bg-gradient-to-br from-mental-surface via-white to-mental-light;
+    @apply bg-gradient-to-br from-mental-surface via-white to-mental-light dark:from-mental-dark dark:via-gray-900 dark:to-gray-950;
   }
   
   .mental-card {
-    @apply bg-white rounded-xl border border-mental-light shadow-sm hover:shadow-md transition-shadow duration-300;
+    @apply bg-white dark:bg-gray-800 rounded-xl border border-mental-light dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow duration-300;
   }
   
   .mental-button {
@@ -109,7 +150,7 @@
   }
   
   .mental-input {
-    @apply px-4 py-3 rounded-lg border border-mental-light bg-white focus:outline-none 
+    @apply px-4 py-3 rounded-lg border border-mental-light dark:border-gray-700 bg-white dark:bg-gray-800 focus:outline-none 
     focus:ring-2 focus:ring-mental-primary/30 transition-all duration-300;
   }
 }
