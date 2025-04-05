@@ -22,21 +22,21 @@ const JournalPrompt: React.FC<JournalPromptProps> = ({ prompt, onSave, className
   
   return (
     <Card className={className}>
-      <CardHeader>
-        <CardTitle className="text-mental-tertiary">Journal Entry</CardTitle>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-lg md:text-xl text-mental-tertiary">Journal Entry</CardTitle>
         <CardDescription>Take a moment to reflect...</CardDescription>
       </CardHeader>
       <CardContent>
-        <p className="text-lg font-medium mb-3 text-mental-secondary italic">"{prompt}"</p>
+        <p className="text-base md:text-lg font-medium mb-3 text-mental-secondary italic">"{prompt}"</p>
         <Textarea
           value={entry}
           onChange={(e) => setEntry(e.target.value)}
           placeholder="Start writing here..."
-          className="min-h-[150px] mental-input"
+          className="min-h-[120px] md:min-h-[150px] mental-input"
         />
       </CardContent>
       <CardFooter>
-        <Button onClick={handleSave} disabled={!entry.trim()} className="mental-button">
+        <Button onClick={handleSave} disabled={!entry.trim()} className="w-full md:w-auto mental-button">
           Save Entry
         </Button>
       </CardFooter>

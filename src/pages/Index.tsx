@@ -4,7 +4,7 @@ import Dashboard from "@/components/Dashboard";
 
 const Index = () => {
   return (
-    <div className="min-h-screen mental-gradient-bg">
+    <div className="min-h-screen w-full mental-gradient-bg">
       <Dashboard />
     </div>
   );

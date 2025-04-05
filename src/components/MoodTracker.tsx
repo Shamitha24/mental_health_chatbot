@@ -25,10 +25,10 @@ const MoodTracker: React.FC<MoodTrackerProps> = ({ onSubmit, className }) => {
 
   return (
     <div className={className}>
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-mental-light">
-        <h3 className="text-xl font-semibold mb-4 text-mental-tertiary">How are you feeling today?</h3>
+      <div className="bg-white rounded-xl p-4 md:p-6 shadow-sm border border-mental-light">
+        <h3 className="text-lg md:text-xl font-semibold mb-3 md:mb-4 text-mental-tertiary">How are you feeling today?</h3>
         
-        <div className="flex justify-between mb-6">
+        <div className="flex justify-between mb-4 md:mb-6">
           {(["great", "good", "neutral", "bad", "terrible"] as MoodType[]).map(mood => (
             <MoodEmoji
               key={mood}
@@ -43,7 +43,7 @@ const MoodTracker: React.FC<MoodTrackerProps> = ({ onSubmit, className }) => {
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           placeholder="Add some notes about your mood (optional)"
-          className="mb-4 resize-none h-24 mental-input"
+          className="mb-4 resize-none h-20 md:h-24 mental-input"
         />
         
         <Button 

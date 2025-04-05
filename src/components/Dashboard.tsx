@@ -1,11 +1,23 @@
 
-import React from "react";
+import React, { useState } from "react";
 import MoodTracker from "./MoodTracker";
 import MoodChart from "./MoodChart";
 import JournalPrompt from "./JournalPrompt";
 import ChatInterface from "./ChatInterface";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { useIsMobile } from "@/hooks/use-mobile";
+import {
+  SidebarProvider,
+  Sidebar,
+  SidebarContent,
+  SidebarTrigger,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+  SidebarInset
+} from "@/components/ui/sidebar";
+import { Book, MessageSquare, BarChart } from "lucide-react";
 
 type MoodType = "great" | "good" | "neutral" | "bad" | "terrible";
 
@@ -32,11 +44,14 @@ const journalPrompts = [
 ];
 
 const Dashboard: React.FC = () => {
+  const isMobile = useIsMobile();
   // State for mood data
-  const [moodData, setMoodData] = React.useState(mockMoodData);
+  const [moodData, setMoodData] = useState(mockMoodData);
+  // Active tab (used for mobile navigation)
+  const [activeTab, setActiveTab] = useState("dashboard");
   
   // Randomly select a journal prompt
-  const [prompt, setPrompt] = React.useState(
+  const [prompt, setPrompt] = useState(
     journalPrompts[Math.floor(Math.random() * journalPrompts.length)]
   );
   
@@ -95,34 +110,116 @@ const Dashboard: React.FC = () => {
     // Set a new random prompt
     setPrompt(journalPrompts[Math.floor(Math.random() * journalPrompts.length)]);
   };
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+  };
   
-  return (
-    <div className="container px-4 py-8 max-w-6xl">
-      <h1 className="text-3xl font-bold mb-6 text-mental-tertiary">Mental Health Copilot</h1>
+  // Mobile sidebar navigation
+  const MobileSidebar = () => (
+    <Sidebar>
+      <SidebarContent>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton 
+              onClick={() => handleTabChange("dashboard")} 
+              isActive={activeTab === "dashboard"}
+              tooltip="Dashboard"
+            >
+              <BarChart />
+              <span>Dashboard</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton 
+              onClick={() => handleTabChange("chat")} 
+              isActive={activeTab === "chat"}
+              tooltip="Chat"
+            >
+              <MessageSquare />
+              <span>Chat</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton 
+              onClick={() => handleTabChange("journal")} 
+              isActive={activeTab === "journal"}
+              tooltip="Journal"
+            >
+              <Book />
+              <span>Journal</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarContent>
+    </Sidebar>
+  );
+  
+  const MainContent = () => (
+    <div className="container px-4 py-4 md:py-8 max-w-6xl">
+      <h1 className="text-2xl md:text-3xl font-bold mb-4 md:mb-6 text-mental-tertiary">Mental Health Copilot</h1>
       
-      <Tabs defaultValue="dashboard" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 mb-8 bg-mental-light">
-          <TabsTrigger value="dashboard" className="data-[state=active]:bg-mental-primary data-[state=active]:text-white">Dashboard</TabsTrigger>
-          <TabsTrigger value="chat" className="data-[state=active]:bg-mental-primary data-[state=active]:text-white">Chat</TabsTrigger>
-          <TabsTrigger value="journal" className="data-[state=active]:bg-mental-primary data-[state=active]:text-white">Journal</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="dashboard" className="animate-fade-in">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <MoodTracker onSubmit={handleMoodSubmit} />
-            <MoodChart data={moodData} />
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="chat" className="animate-fade-in">
-          <ChatInterface />
-        </TabsContent>
-        
-        <TabsContent value="journal" className="animate-fade-in">
-          <JournalPrompt prompt={prompt} onSave={handleJournalSave} />
-        </TabsContent>
-      </Tabs>
+      {isMobile ? (
+        // Mobile view with active tab content
+        <div className="animate-fade-in">
+          {activeTab === "dashboard" && (
+            <div className="grid grid-cols-1 gap-4">
+              <MoodTracker onSubmit={handleMoodSubmit} />
+              <MoodChart data={moodData} />
+            </div>
+          )}
+          
+          {activeTab === "chat" && (
+            <ChatInterface />
+          )}
+          
+          {activeTab === "journal" && (
+            <JournalPrompt prompt={prompt} onSave={handleJournalSave} />
+          )}
+        </div>
+      ) : (
+        // Desktop tabs view
+        <Tabs defaultValue="dashboard" className="w-full" onValueChange={handleTabChange}>
+          <TabsList className="grid w-full grid-cols-3 mb-8 bg-mental-light">
+            <TabsTrigger value="dashboard" className="data-[state=active]:bg-mental-primary data-[state=active]:text-white">Dashboard</TabsTrigger>
+            <TabsTrigger value="chat" className="data-[state=active]:bg-mental-primary data-[state=active]:text-white">Chat</TabsTrigger>
+            <TabsTrigger value="journal" className="data-[state=active]:bg-mental-primary data-[state=active]:text-white">Journal</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="dashboard" className="animate-fade-in">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <MoodTracker onSubmit={handleMoodSubmit} />
+              <MoodChart data={moodData} />
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="chat" className="animate-fade-in">
+            <ChatInterface />
+          </TabsContent>
+          
+          <TabsContent value="journal" className="animate-fade-in">
+            <JournalPrompt prompt={prompt} onSave={handleJournalSave} />
+          </TabsContent>
+        </Tabs>
+      )}
     </div>
+  );
+  
+  return isMobile ? (
+    <SidebarProvider defaultOpen={false}>
+      <div className="flex min-h-svh w-full">
+        <MobileSidebar />
+        <SidebarInset>
+          <div className="flex justify-between items-center p-4 border-b">
+            <h2 className="text-xl font-semibold text-mental-tertiary">Mental Health Copilot</h2>
+            <SidebarTrigger />
+          </div>
+          <MainContent />
+        </SidebarInset>
+      </div>
+    </SidebarProvider>
+  ) : (
+    <MainContent />
   );
 };
 
