@@ -5,7 +5,7 @@ import MoodChart from "./MoodChart";
 import JournalPrompt from "./JournalPrompt";
 import ChatInterface from "./ChatInterface";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { toast } from "@/components/ui/sonner";
+import { toast } from "sonner";
 
 type MoodType = "great" | "good" | "neutral" | "bad" | "terrible";
 
